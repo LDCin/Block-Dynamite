@@ -4,7 +4,8 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     private SpriteRenderer _spriteRenderer;
-    [SerializeField] private float _cellSize = 1f;
+    [SerializeField] private float _cellSize = 1.05f;
+    private string _spriteName;
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -12,6 +13,7 @@ public class Cell : MonoBehaviour
     public void SetSprite(Sprite newSprite)
     {
         _spriteRenderer.sprite = newSprite;
+        _spriteName = newSprite.name;
     }
 
     public float GetCellSize()

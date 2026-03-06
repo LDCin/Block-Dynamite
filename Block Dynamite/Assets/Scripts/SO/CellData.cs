@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public class CellData : MonoBehaviour
+[CreateAssetMenu(menuName = "Block/Cell")]
+public class CellData : ScriptableObject
 {
     public Sprite cellSprite;
 }
