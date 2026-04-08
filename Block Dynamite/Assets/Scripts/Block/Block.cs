@@ -40,8 +40,9 @@ public class Block : MonoBehaviour
         if (_dragging && Input.GetMouseButtonUp(0))
         {
             _dragging = false;
+            List<Vector3> dropCellWorldPos = GetCellWorldPosList();
+            OnDropBlock?.Invoke(_cellSprite, dropCellWorldPos);
             transform.localScale /= 2;
-            OnDropBlock?.Invoke(_cellSprite, GetCellWorldPosList());
             transform.position = _spawnPos;
         }
     }
