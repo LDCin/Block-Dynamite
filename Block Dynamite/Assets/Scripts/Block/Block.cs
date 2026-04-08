@@ -1,13 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Block : MonoBehaviour
 {
+    public static event Action<Sprite, List<Vector3>> OnDropBlock;
     [SerializeField] private bool _destroyOnReturn = false;
     private bool[,] _grid = new bool[8, 8];
-    private List<Vector2Int> _cells = new List<Vector2Int>();
+    private List<Vector2Int> _cellPosInShape = new List<Vector2Int>();
+    private List<Cell> _cells = new List<Cell>();
     [SerializeField] private Cell _cellPrefab;
     private List<Collider2D> _cellColliders = new();
+    private Sprite _cellSprite;
     private bool _dragging = false;
     [SerializeField] private Vector3 _dragOffset = new Vector3(0, 1.5f, 0);
     private Vector3 _spawnPos;
@@ -37,8 +41,20 @@ public class Block : MonoBehaviour
         {
             _dragging = false;
             transform.localScale /= 2;
+            OnDropBlock?.Invoke(_cellSprite, GetCellWorldPosList());
             transform.position = _spawnPos;
         }
+    }
+    public void Init(BlockShapeData shape, Sprite cellSprite)
+    {
+        _grid = (bool[,])shape.GetGrid().Clone();
+        
+        _cellPosInShape = new List<Vector2Int>(shape.cells);
+        _cellSprite = cellSprite;
+        SpawnCells(_cellSprite);
+        // Instantiate(_cellSpawnInBoard);
+        // _cellSpawnInBoard.SetSprite(cellSprite);
+        // _cellSpawnInBoard.gameObject.SetActive(false);
     }
     Vector3 GetMouseWorldPos()
     {
@@ -46,20 +62,16 @@ public class Block : MonoBehaviour
         mousePos.z = -Camera.main.transform.position.z;
         return Camera.main.ScreenToWorldPoint(mousePos);
     }
-    // public List<Vector2Int> GetCells()
-    // {
-    //     return _cells;
-    // }
-    // public bool[,] GetGrid()
-    // {
-    //     return _grid;
-    // }
-    public void Init(BlockShapeData shape, Sprite cellSprite)
-    {
-        _grid = (bool[,])shape.GetGrid().Clone();
-        _cells = new List<Vector2Int>(shape.cells);
 
-        SpawnCells(cellSprite);
+    List<Vector3> GetCellWorldPosList()
+    {
+        List<Vector3> blockWorldPosList = new List<Vector3>();
+        foreach (var cell in _cells)
+        {
+            blockWorldPosList.Add(cell.transform.position);
+        }
+
+        return blockWorldPosList;
     }
     // private void SpawnCells(Sprite cellSprite)
     // {
@@ -75,8 +87,9 @@ public class Block : MonoBehaviour
     {
         float cellSize = _cellPrefab.GetCellSize();
         Vector2 center = GetShapeCenter();
-
-        foreach (var pos in _cells)
+        // _cellPrefab.SetSprite(cellSprite);
+        
+        foreach (var pos in _cellPosInShape)
         {
             Cell cell = Instantiate(_cellPrefab, transform);
             cell.SetSprite(cellSprite);
@@ -84,9 +97,12 @@ public class Block : MonoBehaviour
             Vector2 offset = pos - center;
 
             cell.transform.localPosition = new Vector3(offset.x * cellSize / 2f, offset.y * cellSize / 2f, 0);
+            // cell.transform.localPosition = new Vector3(offset.x * cellSize, offset.y * cellSize, 0);
             _cellColliders.Add(cell.GetComponent<Collider2D>());
+            _cells.Add(cell);
         }
     }
+
     Vector2 GetShapeCenter()
     {
         float minX = float.MaxValue;
@@ -94,7 +110,7 @@ public class Block : MonoBehaviour
         float minY = float.MaxValue;
         float maxY = float.MinValue;
 
-        foreach (var pos in _cells)
+        foreach (var pos in _cellPosInShape)
         {
             if (pos.x < minX) minX = pos.x;
             if (pos.x > maxX) maxX = pos.x;

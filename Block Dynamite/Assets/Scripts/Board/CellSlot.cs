@@ -5,14 +5,12 @@ namespace Board
 {
     public class CellSlot : MonoBehaviour
     {
-        [SerializeField] private Cell _cellPrefabs;
-        // private 
-        private BoxCollider2D _col;
+        private bool _isOccupied = false;
 
-        private void Awake()
+        public bool IsOccupied
         {
-            _col = GetComponent<BoxCollider2D>();
+            get => _isOccupied;
+            set => _isOccupied = value;
         }
-        
     }
 }
