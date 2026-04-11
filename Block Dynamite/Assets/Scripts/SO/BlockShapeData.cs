@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [CreateAssetMenu(menuName = "Block/Shape")]
 public class BlockShapeData : ScriptableObject
 {
+    public int id;
     [SerializeField] private bool[] grid = new bool[64];
     public List<Vector2Int> cells = new List<Vector2Int>();
 
